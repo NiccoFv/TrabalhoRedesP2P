@@ -1,76 +1,100 @@
+Com certeza\! Aqui está um texto completo e bem estruturado para o seu **README.md**. Ele cobre o problema, a tecnologia e os comandos de execução local e com Docker.
+
+-----
+
 # TrabalhoRedesP2P
 
-## 💡 Sobre o Projeto
+Este projeto implementa um sistema de **compartilhamento e replicação de arquivos Peer-to-Peer (P2P)**.
 
-Este projeto implementa uma solução de **rede Ponto a Ponto (P2P)** básica em C\# para demonstrar os princípios de comunicação e descoberta de nós em redes descentralizadas.
+## 🚀 Abordagem do Problema Principal
 
-O problema principal abordado é a **descoberta de serviços e a comunicação direta** entre múltiplos *peers* (pares), eliminando a necessidade de um servidor central. Cada nó (peer) é capaz de atuar tanto como **cliente** (iniciando conexões) quanto como **servidor** (aceitando conexões), criando uma topologia de rede robusta e resiliente.
+O objetivo central deste trabalho é simular uma **rede P2P descentralizada** onde os nós (Peers) podem compartilhar, adicionar e remover arquivos de forma autônoma e resiliente.
 
-A comunicação entre os nós é gerenciada através de *sockets* TCP, garantindo a entrega confiável das mensagens, que neste projeto são usadas para compartilhar listas de *peers* conhecidos e, consequentemente, expandir o conhecimento da rede.
+A solução aborda a **replicação de arquivos** para garantir que o conteúdo não se perca se um Peer sair da rede. Cada Peer é capaz de:
+
+1.  **Conexão e Descoberta:** Conectar-se a Peers conhecidos para iniciar a comunicação.
+2.  **Sincronização:** Manter o seu *filesystem* sincronizado com o de outros Peers.
+3.  **Resiliência:** Replicar arquivos automaticamente, garantindo que a remoção de um arquivo só ocorra quando todos os Peers concordarem, ou que um arquivo se mantenha disponível mesmo que seu Peer original saia.
 
 ## 💻 Tecnologia Utilizada
 
-  * **Linguagem de Programação:** **C\#** (necessita do **.NET** Runtime ou SDK).
-  * **Framework:** **.NET 6.0** (ou superior).
-  * **Contêineres:** **Docker** e **Docker Compose** para orquestração de múltiplos nós.
+O projeto foi desenvolvido em **C\#** utilizando o framework **.NET Core**.
+
+O uso do .NET Core garante compatibilidade *cross-platform* (Windows, macOS, Linux) e oferece ferramentas robustas para desenvolvimento de aplicações de rede, como a manipulação de sockets e comunicação TCP/IP.
+
+## ⚙️ Pré-requisitos para Execução
+
+Para rodar o projeto localmente, você precisa ter instalado:
+
+1.  **SDK do .NET Core (versão 6.0 ou superior):** Necessário para compilar e executar o código C\#.
+2.  **Docker e Docker Compose:** Necessário apenas para a execução e teste da versão conteinerizada do projeto.
 
 -----
 
-## 🛠️ Pré-requisitos de Instalação
+## 🏃 Como Executar e Testar
 
-Para executar e testar o projeto, você precisará ter instalado em sua máquina:
+Existem duas formas de rodar o ambiente de testes: **Local** (utilizando o .NET) ou **Conteinerizada** (utilizando Docker).
 
-1.  **.NET SDK (6.0 ou superior):** Necessário para compilar e rodar o projeto localmente.
-2.  **Docker Desktop:** Necessário para construir e executar os contêineres e o ambiente com `compose.yaml`.
+### 1\. Execução e Teste Local
 
------
+Execute os comandos a seguir no terminal, a partir da raiz do projeto (`TrabalhoP2P/`).
 
-## ▶️ Como Executar o Projeto
+#### 1.1. Inicializar os Peers
 
-Existem duas formas principais de executar e testar a rede P2P: de forma **Local** e usando **Docker Compose**.
+Abra **quatro janelas de terminal** separadas. Em cada uma, execute um comando diferente para inicializar os Peers (os arquivos `.txt` contêm os endereços dos Peers "conhecidos" para iniciar a rede):
 
-### 1\. Execução Local
-
-A execução local simula a rede em sua própria máquina, usando arquivos de configuração locais que apontam para `localhost`.
-
-#### Comando de Execução
-
-Você deve abrir **múltiplos terminais** (um para cada *peer*) e executar o projeto, passando o **ID do *peer*** e o **arquivo de configuração** correspondente:
-
-| Terminal | Comando | Descrição |
+| Peer | Comando | Função |
 | :--- | :--- | :--- |
-| **Peer 1** | `dotnet run -- 1 knownPeers/knownPeers1_local.txt` | Inicializa o Peer 1 na porta 8001. |
-| **Peer 2** | `dotnet run -- 2 knownPeers/knownPeers2_local.txt` | Inicializa o Peer 2 na porta 8002. |
-| **Peer 3** | `dotnet run -- 3 knownPeers/knownPeers3_local.txt` | Inicializa o Peer 3 na porta 8003. |
-| **Peer N** | `dotnet run -- [ID] knownPeers/knownPeers[ID]_local.txt` | Siga o padrão para mais peers. |
+| **Peer 1** | `dotnet run 5000 knownPeers/knownPeers1_local.txt tmp/peer1` | Escuta na porta **5000** |
+| **Peer 2** | `dotnet run 5001 knownPeers/knownPeers2_local.txt tmp/peer2` | Escuta na porta **5001** |
+| **Peer 3** | `dotnet run 5002 knownPeers/knownPeers3_local.txt tmp/peer3` | Escuta na porta **5002** |
+| **Peer 4** | `dotnet run 5003 knownPeers/knownPeers4_local.txt tmp/peer4` | Escuta na porta **5003** |
 
-### 2\. Execução com Docker Compose
+#### 1.2. Comandos de Teste (Adicionar e Remover Arquivos)
 
-O Docker Compose é a maneira **recomendada** para testar a rede, pois ele configura um ambiente isolado onde cada *peer* pode se referenciar usando nomes de serviço, como se fossem máquinas separadas.
+Os Peers devem replicar automaticamente os arquivos entre si. Os diretórios `tmp/peerX` representam os *filesystems* locais de cada Peer.
 
-#### Comandos de Execução
+**A. Adicionar Arquivos:**
+Crie arquivos nos diretórios locais dos Peers. Eles serão propagados na rede.
 
-1.  **Construir as imagens e subir os serviços:**
+```bash
+# Cria "teste1.txt" no Peer 1
+echo “Criando teste 1, pelo Peer1” > tmp/peer1/teste1.txt
 
-    ```bash
-    docker-compose up --build
-    ```
+# Cria "teste2.txt" no Peer 3
+echo “Criando teste 2, pelo Peer3“ > tmp/peer3/teste2.txt
+```
 
-    *Este comando irá criar os contêineres (Peer 1, Peer 2, etc.) e iniciará a comunicação da rede P2P de acordo com o `compose.yaml`.*
+**B. Remover Arquivos:**
+Exclua arquivos de um diretório local. A remoção será propagada na rede para sincronização.
 
-2.  **Visualizar os logs (opcional):**
+```bash
+# Remove "teste1.txt" do Peer 2 (a remoção será sincronizada)
+rm tmp/peer2/teste1.txt
 
-    ```bash
-    docker-compose logs -f
-    ```
+# Remove "teste2.txt" do Peer 1 (a remoção será sincronizada)
+rm tmp/peer1/teste2.txt
+```
 
-    *Use este comando em um terminal separado para acompanhar a troca de mensagens e a descoberta de peers em tempo real.*
+-----
 
-3.  **Encerrar e limpar o ambiente:**
+### 2\. Execução Conteinerizada (Docker)
 
-    ```bash
-    docker-compose down
-    ```
+Esta opção utiliza o `docker-compose.yaml` para subir a rede de Peers em containers isolados, simplificando a inicialização do ambiente.
 
-    *Este comando interrompe e remove os contêineres e a rede criada.*
+#### 2.1. Iniciar a Rede de Peers (Containers)
+
+O comando a seguir irá construir a imagem e iniciar quatro containers em *background*.
+
+```bash
+docker-compose up --build -d
+```
+
+#### 2.2. Parar a Rede de Peers
+
+Para derrubar todos os containers e limpar a rede:
+
+```bash
+docker-compose down
+```
     

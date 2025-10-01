@@ -1,7 +1,3 @@
-Com certeza\! Aqui está um texto completo e bem estruturado para o seu **README.md**. Ele cobre o problema, a tecnologia e os comandos de execução local e com Docker.
-
------
-
 # TrabalhoRedesP2P
 
 Este projeto implementa um sistema de **compartilhamento e replicação de arquivos Peer-to-Peer (P2P)**.
